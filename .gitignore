@@ -1,0 +1,33 @@
+# Binaries
+tmp/
+bin/
+build/
+dist/
+
+# Go
+vendor/
+go.work
+go.work.sum
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+
+# AI agents
+.claude/*
+!.claude/skills/
+
+# Logs
+*.log
+
+# Test output
+coverage/
+*.out
+
+# Private (PRD, design notes, etc.)
+private/
