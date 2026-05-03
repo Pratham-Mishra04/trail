@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "pratham",
+  "owner": {
+    "name": "Pratham Mishra",
+    "url": "https://github.com/Pratham-Mishra04"
+  },
+  "description": "Plugins by Pratham Mishra — currently: trail (process log capture for AI agents).",
+  "plugins": [
+    {
+      "name": "trail",
+      "source": "./integrations/claude-code",
+      "description": "Auto-wires the trail MCP server and bundles a debugging skill that walks through capturing, querying, and cleaning up runtime instrumentation.",
+      "category": "debugging",
+      "keywords": ["logging", "debugging", "mcp", "stdout", "stderr", "observability"],
+      "homepage": "https://github.com/Pratham-Mishra04/trail",
+      "repository": "https://github.com/Pratham-Mishra04/trail",
+      "license": "MIT"
+    }
+  ]
+}
