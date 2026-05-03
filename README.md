@@ -2,18 +2,7 @@
 
 Capture stdout/stderr from any process into per-session JSONL files on disk, and expose those logs to AI coding agents over a stdio MCP server. Single static binary. No daemon, no database, no cloud.
 
-```text
-your-app                trail run / docker
-                                │
-                                ▼
-                  ~/.config/trail/sessions/<uuid>.jsonl
-                                ▲
-                  trail mcp (stdio, spawned by your editor)
-                                ▲
-                                │
-            Claude Code · Cursor · Windsurf · Claude Desktop
-                       (any MCP-capable agent)
-```
+![trail architecture: an app wrapped by `trail run` writes stdout/stderr to a JSONL session file on local disk; `trail mcp` reads that file and serves it over stdio MCP to Claude Code, Cursor, Windsurf, or Claude Desktop](docs/architecture.png)
 
 Run your app under trail, ask your AI agent what went wrong.
 
@@ -29,7 +18,13 @@ Captured logs are plain JSONL on disk. Any tool that can read a text file can re
 
 ## Install
 
-### From source (recommended for now)
+### Via go install
+
+```bash
+go install github.com/Pratham-Mishra04/trail@latest
+```
+
+### From source
 
 ```bash
 git clone https://github.com/Pratham-Mishra04/trail
@@ -38,12 +33,6 @@ make install
 ```
 
 This runs `go install` with version metadata baked in. The binary lands at `$(go env GOPATH)/bin/trail` — make sure that's on your `$PATH`.
-
-### Via go install
-
-```bash
-go install github.com/Pratham-Mishra04/trail@latest
-```
 
 ### Verify
 
@@ -60,11 +49,9 @@ trail version
 # 1. Wrap your app under trail.
 trail run -- node server.js
 
-# trail prints the session id + file path to stderr at startup:
-#   18:04:22  [info]   capturing → 9c5e1b7e-... (file: /Users/.../sessions/9c5e1b7e-....jsonl)
-#
-# Your app runs normally; trail forwards stdout/stderr through to your terminal
-# AND captures every line to the session file.
+# trail prints a startup banner with the session name, session id, and
+# file path, then forwards your app's stdout/stderr through to the terminal
+# while capturing every line to the session file.
 ```
 
 In another terminal (or in your AI editor):
@@ -227,22 +214,6 @@ trail logs --session <id> --format json              # raw JSON entries
 - **Append-only writes** under `PIPE_BUF` so kernel writes are atomic; no locking. Concurrent reads work without coordination.
 - **Server-side filtering** uses `gjson` for cheap pre-filter peeks (level, time, line) and `sonic` for full decode only on entries that pass. "Newest N" queries use a reverse scan: seek to file end, walk backwards in chunks, stop after N matches — constant time regardless of file size.
 - **Conservative log-level detection.** Only sets a non-`unknown` level when there's clear evidence: a JSON `level` field, a logfmt `level=` pair, or an anchored line-prefix pattern (`ERROR:`, `INFO[...]`, `WARN ...`). Free-text matches like substring `"info"` are deliberately not supported to avoid false positives.
-
-For full design context, see `private/PRD.md` in the repo.
-
-## Status
-
-- v0.1.0 — early but feature-complete for the documented scope.
-- 110+ tests, including a real subprocess e2e test that pushes 100K log entries to the MCP server under concurrent write load.
-- Tested on Apple M3 Pro (macOS) and Linux x86_64.
-
-Sample query latencies on the e2e test (100K-entry session):
-- `list_sessions`: ~1ms
-- `get_logs(level=error, limit=100)`: ~1ms (newest reverse-scan)
-- `get_logs(query="cache", limit=100)`: ~1–2ms
-- `get_logs(start_line=N, end_line=N+100)`: ~10ms
-
-Run `make test-perf` and `make test-e2e` to reproduce on your hardware.
 
 ## License
 

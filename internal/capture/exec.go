@@ -13,7 +13,6 @@ import (
 	"syscall"
 
 	"github.com/Pratham-Mishra04/trail/internal/logentry"
-	"github.com/Pratham-Mishra04/trail/internal/logger"
 	"github.com/Pratham-Mishra04/trail/internal/store"
 )
 
@@ -88,8 +87,9 @@ func Exec(ctx context.Context, opts ExecOptions) (int, error) {
 	// Surface the session id + file path so the user (and any agent watching
 	// stderr) can address the session immediately, without polling
 	// list_sessions. This is what the debug-with-trail SKILL relies on to
-	// follow up after a restart.
-	logger.Default().Info("capturing → %s (file: %s)", sess.SessionID(), logger.Path(sess.Path()))
+	// follow up after a restart. Banner auto-degrades to a plain line when
+	// stderr isn't a TTY (CI, piped output).
+	PrintBanner(opts.Meta.Name, sess.SessionID(), sess.Path())
 
 	pipeline := NewPipeline(sess, opts.PipelineOpts)
 
@@ -98,6 +98,7 @@ func Exec(ctx context.Context, opts ExecOptions) (int, error) {
 	defer signal.Stop(sigCh)
 	sigDone := make(chan struct{})
 	defer close(sigDone)
+
 	go func() {
 		for {
 			select {
@@ -189,17 +190,21 @@ func firstNonTrivial(errs ...error) error {
 // the immediate child or its pgid leaves grandchildren orphaned. Walking
 // the descendant tree catches them regardless of pgid layout.
 //
-// Errors are deliberately ignored — by the time we observe the tree some
-// processes may already be exiting, and we'd rather over-signal a dying
-// process than under-signal a live one.
+// We snapshot descendants BEFORE signaling — pgrep -P walks ppid links, so
+// once the parent dies its children get reparented to init and disappear.
+// Parent goes last so it can't respawn anything we just killed. Errors are
+// deliberately ignored: by the time we observe the tree some processes may
+// already be exiting, and we'd rather over-signal a dying process than
+// under-signal a live one.
 func forwardSignal(rootPid int, sig syscall.Signal) {
-	_ = syscall.Kill(rootPid, sig)
+	descs := descendants(rootPid)
 	if pgid, err := syscall.Getpgid(rootPid); err == nil {
 		_ = syscall.Kill(-pgid, sig)
 	}
-	for _, pid := range descendants(rootPid) {
+	for _, pid := range descs {
 		_ = syscall.Kill(pid, sig)
 	}
+	_ = syscall.Kill(rootPid, sig)
 }
 
 // descendants returns every transitive child of root, in BFS order. Uses

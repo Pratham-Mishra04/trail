@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -60,9 +61,10 @@ func DockerCmd(args []string) int {
 		return 1
 	}
 
-	ctx, stop := signalCtx()
-	defer stop()
-	code, err := docker.Run(ctx, docker.RunOptions{
+	// See run.go for why we don't use signalCtx here — capture.Exec installs
+	// its own signal handler that gracefully forwards to the entire child
+	// tree without SIGKILLing the immediate child early.
+	code, err := docker.Run(context.Background(), docker.RunOptions{
 		Store:        s,
 		Container:    container,
 		Name:         name,

@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/Pratham-Mishra04/trail/internal/capture"
 	"github.com/Pratham-Mishra04/trail/internal/cli"
 )
 
@@ -17,6 +18,7 @@ var (
 
 func main() {
 	cli.SetVersion(version, commit, date)
+	capture.SetVersion(version)
 
 	if len(os.Args) < 2 {
 		usage(os.Stderr)

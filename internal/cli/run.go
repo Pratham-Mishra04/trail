@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -54,9 +55,13 @@ func RunCmd(args []string) int {
 		return 1
 	}
 
-	ctx, stop := signalCtx()
-	defer stop()
-	code, err := capture.Run(ctx, capture.RunOptions{
+	// Plain Background ctx — capture.Exec installs its own signal handler that
+	// catches SIGINT/SIGTERM/SIGHUP and forwards them gracefully to the entire
+	// child tree (including orphans tracked by the descendant tracker). Using
+	// signalCtx here would (a) make exec.CommandContext SIGKILL the immediate
+	// child instantly on Ctrl+C, skipping its graceful shutdown, and (b) make
+	// pipeline.Process exit early so we'd lose the child's shutdown logs.
+	code, err := capture.Run(context.Background(), capture.RunOptions{
 		Store:        s,
 		Args:         childArgs,
 		Name:         name,
