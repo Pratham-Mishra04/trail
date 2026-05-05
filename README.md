@@ -18,13 +18,50 @@ Captured logs are plain JSONL on disk. Any tool that can read a text file can re
 
 ## Install
 
+### One-liner (recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Pratham-Mishra04/trail/main/install.sh | sh
+```
+
+Detects your OS/arch, downloads the matching prebuilt binary from the latest GitHub Release, and drops it in `/usr/local/bin/trail`. No Go toolchain required. Override the destination with `BIN_DIR=~/.local/bin` or pin a version with `VERSION=v0.1.0`.
+
+`wget` works too:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/Pratham-Mishra04/trail/main/install.sh | sh
+```
+
+### Manual download
+
+If you'd rather not pipe a script into your shell, grab the archive directly:
+
+```bash
+# pick the right archive for your platform
+ARCHIVE=trail_darwin_arm64.tar.gz
+BASE=https://github.com/Pratham-Mishra04/trail/releases/latest/download
+
+# 1. download the archive and the checksums file
+wget "$BASE/$ARCHIVE"
+wget "$BASE/checksums.txt"
+
+# 2. verify SHA-256 (use sha256sum on Linux, shasum -a 256 on macOS)
+grep " $ARCHIVE\$" checksums.txt | shasum -a 256 -c -
+
+# 3. only extract and install after verification succeeds
+tar xzf "$ARCHIVE"
+sudo mv trail /usr/local/bin/
+```
+
+Available archives: `trail_darwin_arm64.tar.gz`, `trail_darwin_amd64.tar.gz`, `trail_linux_arm64.tar.gz`, `trail_linux_amd64.tar.gz`.
+
 ### Via go install
 
 ```bash
 go install github.com/Pratham-Mishra04/trail@latest
 ```
 
-### From source
+### Build from source
 
 ```bash
 git clone https://github.com/Pratham-Mishra04/trail

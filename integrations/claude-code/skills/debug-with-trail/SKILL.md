@@ -30,7 +30,7 @@ trail version
   > trail isn't installed yet. Install it first, then I can debug this for you:
   >
   > ```bash
-  > brew install Pratham-Mishra04/trail/trail
+  > curl -fsSL https://raw.githubusercontent.com/Pratham-Mishra04/trail/main/install.sh | sh
   > # or:  go install github.com/Pratham-Mishra04/trail@latest
   > ```
   >

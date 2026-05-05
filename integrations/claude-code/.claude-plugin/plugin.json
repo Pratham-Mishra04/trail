@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "trail",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Capture process logs and let your AI agent debug them. Auto-wires the trail MCP server (list_sessions, get_logs) and ships a debugging skill that walks through capturing → querying → cleanup.",
   "author": {
     "name": "Pratham Mishra",

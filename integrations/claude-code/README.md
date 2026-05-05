@@ -16,10 +16,10 @@ Auto-wires the [trail](https://github.com/Pratham-Mishra04/trail) MCP server int
 The plugin only wires up Claude Code — you still need the `trail` binary on your `PATH`.
 
 ```bash
-# macOS + Linux
-brew install Pratham-Mishra04/trail/trail
+# macOS + Linux — prebuilt binary, no Go required
+curl -fsSL https://raw.githubusercontent.com/Pratham-Mishra04/trail/main/install.sh | sh
 
-# or
+# or, if you have Go:
 go install github.com/Pratham-Mishra04/trail@latest
 ```
 
