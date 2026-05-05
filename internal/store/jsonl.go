@@ -273,9 +273,9 @@ func (s *jsonlStore) readInfo(sessionID string) (SessionInfo, error) {
 	}
 
 	info := SessionInfo{Meta: meta, IsActive: pidAlive(meta.CapturerPID)}
-	if !info.IsActive {
-		st, err := f.Stat()
-		if err == nil {
+	if st, err := f.Stat(); err == nil {
+		info.SizeBytes = st.Size()
+		if !info.IsActive {
 			t := st.ModTime().UTC()
 			info.ApproxEndedAt = &t
 		}

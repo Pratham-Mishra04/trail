@@ -21,11 +21,12 @@ type SessionView struct {
 	IsActive      bool       `json:"is_active"`
 	ApproxEndedAt *time.Time `json:"approx_ended_at"`
 	FilePath      string     `json:"file_path"`
+	SizeBytes     int64      `json:"size_bytes"`
 }
 
 // NewSessionView projects a MetaHeader plus liveness fields into the
 // JSON-friendly SessionView shape. approxEndedAt is nil for active sessions.
-func NewSessionView(m MetaHeader, isActive bool, approxEndedAt *time.Time) SessionView {
+func NewSessionView(m MetaHeader, isActive bool, approxEndedAt *time.Time, sizeBytes int64) SessionView {
 	return SessionView{
 		SessionID:     m.SessionID,
 		Name:          m.Name,
@@ -37,5 +38,6 @@ func NewSessionView(m MetaHeader, isActive bool, approxEndedAt *time.Time) Sessi
 		IsActive:      isActive,
 		ApproxEndedAt: approxEndedAt,
 		FilePath:      m.FilePath,
+		SizeBytes:     sizeBytes,
 	}
 }

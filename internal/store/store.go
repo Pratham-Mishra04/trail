@@ -65,6 +65,7 @@ type SessionInfo struct {
 	Meta          logentry.MetaHeader
 	IsActive      bool       // kill(capturer_pid, 0) == nil (or EPERM)
 	ApproxEndedAt *time.Time // nil if active, else file mtime
+	SizeBytes     int64      // on-disk size of the session file
 }
 
 // Filter is the input shape for Read. nil pointers mean "no filter on that

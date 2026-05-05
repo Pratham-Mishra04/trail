@@ -128,7 +128,7 @@ func sessionsRm(args []string) int {
 func emitSessionsJSON(infos []store.SessionInfo) int {
 	views := make([]logentry.SessionView, 0, len(infos))
 	for _, info := range infos {
-		views = append(views, logentry.NewSessionView(info.Meta, info.IsActive, info.ApproxEndedAt))
+		views = append(views, logentry.NewSessionView(info.Meta, info.IsActive, info.ApproxEndedAt, info.SizeBytes))
 	}
 	return printJSON("sessions", views)
 }
@@ -147,6 +147,7 @@ func emitSessionsTable(infos []store.SessionInfo) int {
 			truncate(info.Meta.Name, 30),
 			info.Meta.Source,
 			relativeTime(info.Meta.StartedAt),
+			formatBytes(info.SizeBytes),
 			truncate(info.Meta.Command, 50),
 		})
 	}
@@ -155,7 +156,7 @@ func emitSessionsTable(infos []store.SessionInfo) int {
 	t := table.New().
 		Border(lipgloss.RoundedBorder()).
 		BorderStyle(styleBorder).
-		Headers("SESSION ID", "STATUS", "NAME", "SOURCE", "STARTED", "COMMAND").
+		Headers("SESSION ID", "STATUS", "NAME", "SOURCE", "STARTED", "SIZE", "COMMAND").
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {
 			if row == table.HeaderRow {
@@ -194,6 +195,19 @@ func relativeTime(t time.Time) string {
 		}
 		return fmt.Sprintf("%d days ago", days)
 	}
+}
+
+func formatBytes(n int64) string {
+	const unit = 1024
+	if n < unit {
+		return fmt.Sprintf("%d B", n)
+	}
+	div, exp := int64(unit), 0
+	for n/div >= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB", float64(n)/float64(div), "KMGTPE"[exp])
 }
 
 func truncate(s string, n int) string {
