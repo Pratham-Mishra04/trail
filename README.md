@@ -24,7 +24,7 @@ Captured logs are plain JSONL on disk. Any tool that can read a text file can re
 curl -fsSL https://raw.githubusercontent.com/Pratham-Mishra04/trail/main/install.sh | sh
 ```
 
-Detects your OS/arch, downloads the matching prebuilt binary from the latest GitHub Release, and drops it in `/usr/local/bin/trail`. No Go toolchain required. Override the destination with `BIN_DIR=~/.local/bin` or pin a version with `VERSION=v0.1.0`.
+Detects your OS/arch, downloads the matching prebuilt binary from the latest GitHub Release, verifies its SHA-256 checksum, and drops it in `~/.local/bin/trail`. If `~/.local/bin` isn't on your `$PATH`, the script prints the exact `export` line to add it. Override the destination with `BIN_DIR=/usr/local/bin` (you'll need write access to that path) or pin a version with `VERSION=v0.1.0`.
 
 `wget` works too:
 
@@ -75,8 +75,10 @@ This runs `go install` with version metadata baked in. The binary lands at `$(go
 
 ```bash
 trail version
-# trail dev (commit ..., built ...)
+# trail 0.1.3 (commit 531e588..., built 2026-05-05T21:17:04Z)
 ```
+
+If you installed via `go install`, version metadata isn't injected (Go's stdlib `go install` doesn't pass `-ldflags`), and you'll see `trail dev (commit none, built unknown)` instead. That's expected — the binary works the same; only the reported version string differs.
 
 **Supported platforms:** macOS and Linux on amd64/arm64. Windows is not supported.
 

@@ -2,7 +2,7 @@
 set -eu
 
 REPO="Pratham-Mishra04/trail"
-BIN_DIR="${BIN_DIR:-/usr/local/bin}"
+BIN_DIR="${BIN_DIR:-${HOME}/.local/bin}"
 VERSION="${VERSION:-latest}"
 
 uname_s=$(uname -s)
@@ -56,18 +56,27 @@ fi
 tar -xzf "$tmp/$archive" -C "$tmp"
 chmod +x "$tmp/trail"
 
-if [ -w "$BIN_DIR" ] || { [ ! -e "$BIN_DIR" ] && [ -w "$(dirname "$BIN_DIR")" ]; }; then
-  mkdir -p "$BIN_DIR"
-  mv "$tmp/trail" "$BIN_DIR/trail"
-else
-  echo "trail: installing to ${BIN_DIR} (sudo required)"
-  command -v sudo >/dev/null 2>&1 || {
-    echo "trail: sudo is required to install to ${BIN_DIR}" >&2
-    exit 1
-  }
-  sudo mkdir -p "$BIN_DIR"
-  sudo mv "$tmp/trail" "$BIN_DIR/trail"
-fi
+mkdir -p "$BIN_DIR" || {
+  echo "trail: cannot create ${BIN_DIR}. Set BIN_DIR=<writable-path> and re-run." >&2
+  exit 1
+}
+mv "$tmp/trail" "$BIN_DIR/trail" || {
+  echo "trail: cannot write to ${BIN_DIR}. Set BIN_DIR=<writable-path> and re-run." >&2
+  exit 1
+}
 
 echo "trail: installed to ${BIN_DIR}/trail"
-"$BIN_DIR/trail" version || true
+
+case ":${PATH:-}:" in
+  *":${BIN_DIR}:"*)
+    "$BIN_DIR/trail" version || true
+    ;;
+  *)
+    echo
+    echo "trail: ${BIN_DIR} is not on your PATH. Add it with one of:"
+    echo "  export PATH=\"${BIN_DIR}:\$PATH\"                          # current shell only"
+    echo "  echo 'export PATH=\"${BIN_DIR}:\$PATH\"' >> ~/.zshrc        # zsh (macOS default)"
+    echo "  echo 'export PATH=\"${BIN_DIR}:\$PATH\"' >> ~/.bashrc       # bash"
+    echo "Then run: trail version"
+    ;;
+esac
