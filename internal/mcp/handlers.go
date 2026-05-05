@@ -59,7 +59,7 @@ func (h *handlers) listSessions(ctx context.Context, req mcpsdk.CallToolRequest)
 		if activeOnly && !info.IsActive {
 			continue
 		}
-		out = append(out, logentry.NewSessionView(info.Meta, info.IsActive, info.ApproxEndedAt))
+		out = append(out, logentry.NewSessionView(info.Meta, info.IsActive, info.ApproxEndedAt, info.SizeBytes))
 		if len(out) >= limit {
 			break
 		}
