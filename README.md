@@ -70,6 +70,19 @@ trail logs --session 9c5e1b7e-... --query "ECONNREFUSED"
 
 The agent calls `list_sessions` and `get_logs` over MCP and gets back structured results.
 
+## Use cases
+
+The common thread: your terminal is producing more output than you want to copy-paste, and your agent's context window is precious. Capture the run with trail, hand the agent a session ID, and let it filter server-side.
+
+- **Debugging a running app.** Wrap your dev server (`trail run -- npm run dev`, `trail run -- python manage.py runserver`, …) and when something breaks, ask your agent to look at the latest session. The Claude Code plugin ships an opinionated workflow for this — see [Agentic debug sessions](#agentic-debug-sessions) below.
+- **Investigating long test runs.** `trail run -- go test -v ./...` (or `pytest -v`, `cargo test -- --nocapture`, `npm test`) captures every line. When the suite finishes, hand the agent the session ID — *"what failed in trail session 9c5e1b7e and why?"* — instead of scrolling thousands of lines or pasting them into the chat. Add `--ephemeral` if you only need the capture for the duration of the run — the file is deleted when the capturer exits cleanly.
+- **Build / lint / typecheck output.** Long compiler runs, warning floods, mass-rename type errors. Capture once, then query by `level=error` or by a regex matching the symbol you care about.
+- **Comparing flaky runs.** Run the same test twice under trail, give the agent both session IDs, and ask what differs between the passing and failing run.
+- **Long-running scripts and migrations.** Backfills, data migrations, deploy scripts — keep a permanent, queryable record instead of relying on terminal scrollback. You can ask later: *"what did the migration on session X actually do?"*
+- **Noisy Docker containers.** `trail docker <name>` attaches to an existing container's log stream without flooding your agent's context — same query surface, same workflow.
+
+In every case the pattern is the same: attach a terminal session to your agent by handing it an ID, instead of piping the output through prompts.
+
 ## Agentic debug sessions
 
 The Claude Code plugin ships with a debugging skill (`debug-with-trail`) that turns your editor into a full debug-mode-style workflow — comparable to dedicated debug features in other AI editors, but built on the open MCP layer so it works with any agent that loads the skill.
@@ -174,6 +187,8 @@ This means:
 |---|---|---|
 | Wrapped command | `trail run -- <cmd>` | Wraps any binary; `exec.Cmd` with separate stdout/stderr pipes preserves stream attribution. |
 | Docker container | `trail docker <name>` | Wraps `docker logs -f`; passes `--since` through. |
+
+Both commands accept `--name <label>` to override the auto-derived session name and `--ephemeral` to delete the session file when the capturer exits cleanly (the file survives a `SIGKILL` of the capturer — only graceful shutdown triggers cleanup).
 
 What it does **not** capture:
 - A bare PID you didn't start under trail (would require `ptrace` / `eBPF` — out of scope).
