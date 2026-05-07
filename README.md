@@ -82,6 +82,18 @@ If you installed via `go install`, version metadata isn't injected (Go's stdlib 
 
 **Supported platforms:** macOS and Linux on amd64/arm64. Windows is not supported.
 
+### Claude Code plugin (recommended for Claude Code users)
+
+If you use Claude Code, install the plugin in addition to the binary above. It auto-wires the MCP server and registers the [`debug-with-trail`](#agentic-debug-sessions) skill:
+
+```text
+/plugin marketplace add Pratham-Mishra04/trail
+/plugin install trail@pratham
+/reload-plugins
+```
+
+Verify by asking *"What skills are available?"* — `pratham:trail:debug-with-trail` should appear. For other editors (Cursor, Windsurf, Claude Desktop) or for using Claude Code without the plugin, see [Editor setup](#editor-setup).
+
 ## Quickstart
 
 ```bash
@@ -144,19 +156,9 @@ The whole flow is opinionated for safety: every added log line has a unique sess
 
 ## Editor setup
 
-### Claude Code (recommended: plugin)
+For Claude Code, the plugin is the recommended path — see [Claude Code plugin](#claude-code-plugin-recommended-for-claude-code-users) above. The configs below cover other editors and the no-plugin fallback for Claude Code.
 
-The plugin auto-wires the MCP server and registers the debug skill described above:
-
-```text
-/plugin marketplace add Pratham-Mishra04/trail
-/plugin install trail@pratham
-/reload-plugins
-```
-
-Verify by asking *"What skills are available?"* — `pratham:trail:debug-with-trail` should appear.
-
-### Claude Code (manual, no plugin)
+### Claude Code (without the plugin)
 
 ```bash
 claude mcp add trail -s user -- trail mcp
