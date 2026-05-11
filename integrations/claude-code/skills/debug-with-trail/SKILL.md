@@ -1,7 +1,7 @@
 ---
 name: debug-with-trail
 description: Debug runtime issues for servers, daemons, workers, and test runs by querying captured stdout/stderr via trail's MCP tools. Walks through prerequisites check, optional targeted instrumentation, log analysis, and mandatory cleanup of any added logs.
-when_to_use: User asks to "debug this", "why is this failing", "what's in the logs", "why did it crash", "investigate this error", "trace the bug", "what's happening when I do X", "this test is failing", "why does this test fail", "fix the failing test", "the test suite is broken", or pastes an error message / test failure output and asks for help diagnosing it.
+when_to_use: User asks to "debug this", "why is this failing", "what's in the logs", "why did it crash", "investigate this error", "trace the bug", "what's happening when I do X", "this test is failing", "why does this test fail", "fix the failing test", "the test suite is broken", pastes an error message / test failure output and asks for help diagnosing it, or volunteers a trail session id (e.g. "my server is running with trail id <uuid>", "the API is captured under trail, session <uuid>", or pastes the `capturing → <uuid>` line).
 allowed-tools: Bash Read Edit Grep Glob mcp__plugin_trail_trail__list_sessions mcp__plugin_trail_trail__get_logs
 ---
 
@@ -196,7 +196,9 @@ trail version
 
 ### 1.2 Is the relevant process being captured by trail?
 
-Call the `list_sessions` MCP tool with `active_only: true` to see what's currently being captured:
+**Fast path — user supplied a session id.** If the user's message includes a trail session UUID (e.g. *"my server is running with trail id 39f6875e-…"*, *"the API is captured under trail, session aaa-111"*, or a pasted `capturing → <uuid>` line), use that UUID directly as the `session_id` for all subsequent `get_logs` calls. Skip the `list_sessions` call below — the user has already told you which session to query. Sanity-check it once with a cheap `get_logs` call (e.g. `{"duration": "1m"}`); if it returns an "unknown session" error, fall through to `list_sessions` and ask which one they meant.
+
+Otherwise, call the `list_sessions` MCP tool with `active_only: true` to see what's currently being captured:
 
 ```json
 list_sessions({"active_only": true})
