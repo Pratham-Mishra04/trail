@@ -6,8 +6,8 @@ require (
 	github.com/bytedance/sonic v1.15.1
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/google/uuid v1.6.0
-	github.com/mark3labs/mcp-go v0.50.0
-	github.com/tidwall/gjson v1.18.0
+	github.com/mark3labs/mcp-go v0.53.0
+	github.com/tidwall/gjson v1.19.0
 )
 
 require (
